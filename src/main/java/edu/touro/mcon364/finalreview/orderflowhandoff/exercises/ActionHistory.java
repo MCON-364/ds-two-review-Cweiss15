@@ -1,6 +1,10 @@
 package edu.touro.mcon364.finalreview.orderflowhandoff.exercises;
 
-import edu.touro.mcon364.finalreview.model.Action;import java.util.Optional;
+import edu.touro.mcon364.finalreview.model.Action;
+
+import java.util.ArrayDeque;
+import java.util.Optional;
+import java.util.Stack;
 
 /**
  * In-class Exercise 1 — Action History
@@ -28,28 +32,37 @@ import edu.touro.mcon364.finalreview.model.Action;import java.util.Optional;
 
  */
 public class ActionHistory {
+    Stack<Action> undo = new Stack<>();
+    Stack<Action> redo = new Stack<>();
 
     public void perform(Action action) {
-        // TODO: implement based on the requirements above
+        undo.push(action);
+        redo.clear();
     }
 
     public Optional<Action> undo() {
-        // TODO: implement based on the requirements above
+        if(!undo.isEmpty()) {
+            Action toUndo = undo.pop();
+            redo.push(toUndo);
+            return Optional.of(toUndo);
+        }
         return Optional.empty();
     }
 
     public Optional<Action> redo() {
-        // TODO: implement based on the requirements above
+        if(!redo.isEmpty()) {
+            Action toRedo = redo.pop();
+            undo.push(toRedo);
+            return Optional.of(toRedo);
+        }
         return Optional.empty();
     }
 
     public int getUndoCount() {
-        // TODO: implement based on the requirements above
-        return 0;
+        return undo.size();
     }
 
     public int getRedoCount() {
-        // TODO: implement based on the requirements above
-        return 0;
+        return redo.size();
     }
 }

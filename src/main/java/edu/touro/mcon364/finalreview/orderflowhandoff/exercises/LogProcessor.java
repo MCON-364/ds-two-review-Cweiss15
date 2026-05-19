@@ -4,6 +4,7 @@ import edu.touro.mcon364.finalreview.model.LogLevel;
 import edu.touro.mcon364.finalreview.model.LogMessage;
 
 import java.util.Map;
+import java.util.concurrent.*;
 
 /**
  * LogProcessor.
@@ -62,18 +63,25 @@ public class LogProcessor {
      * - count by log level
      */
 
+    LinkedBlockingQueue<LogMessage> messages = new LinkedBlockingQueue<>();
+    ExecutorService pool;
     /**
      * Accept one message for processing.
      */
     public void submit(LogMessage message) {
-        // TODO: implement
+        messages.offer(message);
     }
 
     /**
      * Start the requested number of background workers.
      */
     public void start(int workerCount) {
-        // TODO: implement
+        pool = Executors.newFixedThreadPool(workerCount);
+        for (int i = 0; i < workerCount; i++) {
+            if(!messages.isEmpty()) {
+
+            }
+        }
     }
 
     /**
