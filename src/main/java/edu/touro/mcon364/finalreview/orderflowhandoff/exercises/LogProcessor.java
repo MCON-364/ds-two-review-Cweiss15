@@ -3,8 +3,10 @@ package edu.touro.mcon364.finalreview.orderflowhandoff.exercises;
 import edu.touro.mcon364.finalreview.model.LogLevel;
 import edu.touro.mcon364.finalreview.model.LogMessage;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * LogProcessor.
@@ -62,9 +64,12 @@ public class LogProcessor {
      * - total processed count
      * - count by log level
      */
+    private volatile boolean running = true;
 
     LinkedBlockingQueue<LogMessage> messages = new LinkedBlockingQueue<>();
     ExecutorService pool;
+    private final AtomicInteger processed = new AtomicInteger(0);
+    private final Map<LogLevel, AtomicInteger> levelsCount = new ConcurrentHashMap<>();
     /**
      * Accept one message for processing.
      */
@@ -76,11 +81,13 @@ public class LogProcessor {
      * Start the requested number of background workers.
      */
     public void start(int workerCount) {
+        if (workerCount <= 0) {
+            throw new IllegalArgumentException();
+        }
+
         pool = Executors.newFixedThreadPool(workerCount);
         for (int i = 0; i < workerCount; i++) {
-            if(!messages.isEmpty()) {
-
-            }
+            pool.submit(this::workerLoop);
         }
     }
 
@@ -91,36 +98,58 @@ public class LogProcessor {
      * private helper if your design is clearer that way.
      */
     private void workerLoop() {
-        // TODO: implement
+        try {
+            while (running || !messages.isEmpty()) {
+
+                LogMessage message =
+                        messages.poll(100, TimeUnit.MILLISECONDS);
+
+                if (message == null) {
+                    continue;
+                }
+
+                process(message);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     /**
      * Process one message and update whatever statistics this class tracks.
      */
     private void process(LogMessage message) {
-        // TODO: implement
+        processed.incrementAndGet();
+        levelsCount.computeIfAbsent(message.level(), l ->  new AtomicInteger()).incrementAndGet();
     }
 
     /**
      * Stop the processor and wait for worker threads to finish.
      */
     public void stop() throws InterruptedException {
-        // TODO: implement
+        running = false;
+
+        pool.shutdown();
+
+        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
     }
 
     /**
      * Return the number of messages processed so far.
      */
     public int getTotalProcessed() {
-        // TODO: implement
-        return 0;
+        return processed.get();
     }
 
     /**
      * Return a safe snapshot of the counts by level.
      */
     public Map<LogLevel, Integer> getCountsByLevel() {
-        // TODO: implement
-        return Map.of();
+        Map<LogLevel, Integer> result = new HashMap<>();
+        for (var entry : levelsCount.entrySet()) {
+            result.put(entry.getKey(), entry.getValue().get());
+        }
+        return Map.copyOf(result);
     }
 }
+
