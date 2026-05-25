@@ -1,10 +1,13 @@
 package edu.touro.mcon364.finalreview.orderflowhandoff.exercises;
 
+import edu.touro.mcon364.finalreview.model.Priority;
 import edu.touro.mcon364.finalreview.model.SupportTicket;
 import edu.touro.mcon364.finalreview.model.TicketReport;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Building a report from completed work.
@@ -70,15 +73,14 @@ public class TicketReportBuilder {
      */
     public TicketReportBuilder(List<SupportTicket> tickets) {
         // TODO: validate and store the tickets this object will analyze
-        this.tickets = List.of();
+        this.tickets = new ArrayList<>(tickets);
     }
 
     /**
      * Return how many tickets in this report data set were resolved.
      */
     public long getResolvedCount() {
-        // TODO: calculate from tickets
-        return 0;
+        return tickets.stream().filter(SupportTicket::resolved).count();
     }
 
     /**
@@ -88,7 +90,7 @@ public class TicketReportBuilder {
      */
     public double getAverageResolutionMinutes() {
         // TODO: calculate from tickets
-        return 0.0;
+        return tickets.stream().filter(SupportTicket::resolved).collect(Collectors.averagingDouble(SupportTicket::minutesToResolve));
     }
 
     /**
@@ -96,7 +98,7 @@ public class TicketReportBuilder {
      */
     public Map<String, Long> getCountByCategory() {
         // TODO: calculate from tickets
-        return Map.of();
+        return Map.copyOf(tickets.stream().collect(Collectors.groupingBy((SupportTicket::category),Collectors.counting())));
     }
 
     /**
@@ -104,7 +106,8 @@ public class TicketReportBuilder {
      */
     public List<SupportTicket> getHighPriorityUnresolved() {
         // TODO: calculate from tickets
-        return List.of();
+        return List.copyOf(tickets.stream().filter(tickets -> !tickets.resolved()).filter(ticket -> ticket.priority()== Priority.HIGH).collect(Collectors.toList()));
+
     }
 
     /**
