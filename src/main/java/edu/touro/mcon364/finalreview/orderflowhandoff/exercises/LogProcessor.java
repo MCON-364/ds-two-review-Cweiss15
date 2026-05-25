@@ -129,9 +129,10 @@ public class LogProcessor {
     public void stop() throws InterruptedException {
         running = false;
 
-        pool.shutdown();
-
-        pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        if (pool != null) {
+            pool.shutdown();
+            pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        }
     }
 
     /**

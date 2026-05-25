@@ -3,6 +3,9 @@ package edu.touro.mcon364.finalreview.orderflowhandoff.homework;
 import edu.touro.mcon364.finalreview.model.PrintJob;
 
 import java.util.Optional;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Homework 1 — PrintQueue.
@@ -37,7 +40,7 @@ import java.util.Optional;
  * - The class should not expose its internal collection directly.
  */
 public class PrintQueue {
-
+    LinkedBlockingQueue<PrintJob> jobs = new LinkedBlockingQueue();
     // TODO: choose the field or fields needed to remember waiting print jobs
 
     /**
@@ -46,7 +49,7 @@ public class PrintQueue {
      * @param job the print job to add
      */
     public void submit(PrintJob job) {
-        // TODO: implement
+        jobs.add(job);
     }
 
     /**
@@ -55,7 +58,10 @@ public class PrintQueue {
      * @return the next print job, or Optional.empty() when no jobs are waiting
      */
     public Optional<PrintJob> printNext() {
-        // TODO: implement
+        if (!jobs.isEmpty()) {
+            PrintJob toPrint = jobs.poll();
+            return Optional.of(toPrint);
+        }
         return Optional.empty();
     }
 
@@ -65,7 +71,9 @@ public class PrintQueue {
      * @return the next print job, or Optional.empty() when no jobs are waiting
      */
     public Optional<PrintJob> peekNext() {
-        // TODO: implement
+        if (!jobs.isEmpty()) {
+            return Optional.of(jobs.peek());
+        }
         return Optional.empty();
     }
 
@@ -73,7 +81,6 @@ public class PrintQueue {
      * Returns the number of jobs currently waiting to be printed.
      */
     public int queuedJobs() {
-        // TODO: implement
-        return 0;
+        return jobs.size();
     }
 }
